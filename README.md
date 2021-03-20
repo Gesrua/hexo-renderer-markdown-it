@@ -29,6 +29,7 @@ markdown:
   render:
     html: true
     xhtmlOut: false
+    langPrefix: 'language-'
     breaks: true
     linkify: true
     typographer: true
@@ -44,7 +45,7 @@ markdown:
     permalinkSide: 'left'
     permalinkSymbol: '¶'
     case: 0
-    separator: ''
+    separator: '-'
 ```
 
 Refer to [the wiki](https://github.com/hexojs/hexo-renderer-markdown-it/wiki) for more details.
@@ -57,8 +58,22 @@ For example, to enable [unsafe links](https://markdown-it.github.io/markdown-it/
 
 ``` js
 hexo.extend.filter.register('markdown-it:renderer', function(md) {
-  const { config } = this; // Skip this line if you don't need user config from _config.yml
+  const { config } = this; // Optional, parse user config from _config.yml
   md.validateLink = function() { return true; };
+});
+
+// Specify custom function in plugin option
+const { slugize } = require('hexo-util');
+const opts = hexo.config.markdown.anchors;
+const mdSlugize = (str) => {
+  return slugize(str, { transform: opts.case, ...opts });
+};
+
+hexo.extend.filter.register('markdown-it:renderer', function(md) {
+  md.use(require('markdown-it-table-of-contents'), {
+    includeLevel: [2,3,4],
+    slugify: mdSlugize
+  });
 });
 ```
 
